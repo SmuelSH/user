@@ -34,6 +34,8 @@ func dbcnn() (*sql.DB, error) {
 	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;database=%s", server, user, password, database)
 	db, errdb := sql.Open(drivermssql, connString)
 
+	defer handleOutOfBounds()
+
 	if errdb != nil {
 		log.Fatal("Error open db:" + errdb.Error())
 	}
@@ -41,18 +43,21 @@ func dbcnn() (*sql.DB, error) {
 	rst, errdb := db.Query("select 1")
 	if errdb != nil {
 
-		log.Fatal("error abrir rst:" + errdb.Error())
+		//log.Fatal("error abrir rst:" + errdb.Error())
+		panic("Out of bound access for slice")
 	}
 
-	if errdb != nil {
-
-		log.Fatal("error abrir rst:" + errdb.Error())
-	}
 	defer rst.Close()
 
 	log.Println("BD conected")
 
 	return db, errdb
+}
+
+func handleOutOfBounds() {
+	if r := recover(); r != nil {
+		fmt.Println("Recovering from panic:", r)
+	}
 }
 
 func UserInsert(usrd UserData) {
@@ -77,6 +82,10 @@ func UserInsert(usrd UserData) {
 			}
 			log.Println(sntran, sDescr)
 		}
+
+	} else {
+
+		fmt.Println("Problemas de Conexion:" + err.Error())
 
 	}
 
